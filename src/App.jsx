@@ -10,76 +10,99 @@ import { Interface } from "ethers";
 import ABI from "./ABI/proposal.json";
 
 const multicallAbi = [
-    "function tryAggregate(bool requireSuccess, (address target, bytes callData)[] calls) returns ((bool success, bytes returnData)[] returnData)",
+  "function tryAggregate(bool requireSuccess, (address target, bytes callData)[] calls) returns ((bool success, bytes returnData)[] returnData)",
 ];
 
 function App() {
-    const readOnlyProposalContract = useContract(true);
-    const { readOnlyProvider } = useRunners();
-    const [proposals, setProposals] = useState([]);
+  const readOnlyProposalContract = useContract(true);
+  const { readOnlyProvider } = useRunners();
+  const [proposals, setProposals] = useState([]);
 
-    const fetchProposals = useCallback(async () => {
-        if (!readOnlyProposalContract) return;
+  const fetchProposals = useCallback(async () => {
+    if (!readOnlyProposalContract) return;
 
-        const multicallContract = new Contract(
-            import.meta.env.VITE_MULTICALL_ADDRESS,
-            multicallAbi,
-            readOnlyProvider
-        );
-
-        const itf = new Interface(ABI);
-
-        try {
-            const proposalCount = Number(
-                await readOnlyProposalContract.proposalCount()
-            );
-
-            const proposalsIds = Array.from(
-                { length: proposalCount - 1 },
-                (_, i) => i + 1
-            );
-
-            const calls = proposalsIds.map((id) => ({
-                target: import.meta.env.VITE_CONTRACT_ADDRESS,
-                callData: itf.encodeFunctionData("proposals", [id]),
-            }));
-
-            const responses = await multicallContract.tryAggregate.staticCall(
-                true,
-                calls
-            );
-
-            const decodedResults = responses.map((res) =>
-                itf.decodeFunctionResult("proposals", res.returnData)
-            );
-
-            const data = decodedResults.map((proposalStruct) => ({
-                description: proposalStruct.description,
-                amount: proposalStruct.amount,
-                minRequiredVote: proposalStruct.minVotesToPass,
-                votecount: proposalStruct.voteCount,
-                deadline: proposalStruct.votingDeadline,
-                executed: proposalStruct.executed,
-            }));
-
-            setProposals(data);
-        } catch (error) {
-            console.log("error fetching proposals: ", error);
-        }
-    }, [readOnlyProposalContract, readOnlyProvider]);
-
-    useEffect(() => {
-        fetchProposals();
-    }, [fetchProposals]);
-
-    return (
-        <Layout>
-            <Box className="flex justify-end p-4">
-                <CreateProposalModal />
-            </Box>
-            <Proposals proposals={proposals} />
-        </Layout>
+    const multicallContract = new Contract(
+      import.meta.env.VITE_MULTICALL_ADDRESS,
+      multicallAbi,
+      readOnlyProvider
     );
+
+    const itf = new Interface(ABI);
+
+    try {
+      const proposalCount = Number(
+        await readOnlyProposalContract.proposalCount()
+      );
+
+      const proposalsIds = Array.from(
+        { length: proposalCount - 1 },
+        (_, i) => i + 1
+      );
+
+      const calls = proposalsIds.map((id) => ({
+        target: import.meta.env.VITE_CONTRACT_ADDRESS,
+        callData: itf.encodeFunctionData("proposals", [id]),
+      }));
+
+      const responses = await multicallContract.tryAggregate.staticCall(
+        true,
+        calls
+      );
+
+      const decodedResults = responses.map((res) =>
+        itf.decodeFunctionResult("proposals", res.returnData)
+      );
+
+      const data = decodedResults.map((proposalStruct, index) => ({
+        id: index + 1,
+        description: proposalStruct.description,
+        amount: proposalStruct.amount,
+        minRequiredVote: proposalStruct.minVotesToPass,
+        votecount: proposalStruct.voteCount,
+        deadline: proposalStruct.votingDeadline,
+        executed: proposalStruct.executed,
+      }));
+
+      setProposals(data);
+    } catch (error) {
+      console.log("error fetching proposals: ", error);
+    }
+  }, [readOnlyProposalContract, readOnlyProvider]);
+
+  const updateProposals = () => {
+    fetchProposals();
+  };
+
+  const updateVoteCount = (_proposalId) => {
+    setProposals((prevProposals) =>
+      prevProposals.map((proposal) => {
+        if (proposal.id === _proposalId)
+          return {
+            ...proposal,
+            votecount: proposal.votecount + BigInt(1),
+          };
+        return proposal;
+      })
+    );
+  };
+
+  useEffect(() => {
+    if (!!readOnlyProposalContract) {
+      readOnlyProposalContract.on("ProposalCreated", updateProposals);
+      readOnlyProposalContract.on("Voted", updateVoteCount);
+    }
+
+    fetchProposals();
+  }, [fetchProposals]);
+
+  return (
+    <Layout>
+      <Box className="flex justify-end p-4">
+        <CreateProposalModal />
+      </Box>
+      <Proposals proposals={proposals} />
+    </Layout>
+  );
 }
 
 export default App;
