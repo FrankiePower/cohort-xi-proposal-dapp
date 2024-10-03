@@ -95,8 +95,8 @@ function App() {
     fetchProposals();
 
     return () => {
-      readOnlyProposalContract.on("ProposalCreated", updateProposals);
-      readOnlyProposalContract.on("Voted", updateVoteCount);
+      readOnlyProposalContract.off("ProposalCreated", updateProposals);
+      readOnlyProposalContract.off("Voted", updateVoteCount);
     };
   }, [fetchProposals]);
 
