@@ -93,6 +93,11 @@ function App() {
     }
 
     fetchProposals();
+
+    return () => {
+      readOnlyProposalContract.on("ProposalCreated", updateProposals);
+      readOnlyProposalContract.on("Voted", updateVoteCount);
+    };
   }, [fetchProposals]);
 
   return (
