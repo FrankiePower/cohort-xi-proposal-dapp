@@ -55,6 +55,7 @@ function App() {
 
       const data = decodedResults.map((proposalStruct, index) => ({
         id: index + 1,
+        count: index + 1,
         description: proposalStruct.description,
         amount: proposalStruct.amount,
         minRequiredVote: proposalStruct.minVotesToPass,

@@ -11,7 +11,7 @@ const useVoteProposal = () => {
   const { chainId } = useAppKitNetwork();
 
   return useCallback(
-    async (_proposalId) => {
+    async (_proposalId, minRequiredVote, votecount) => {
       if (!address) {
         toast.error("Connect your wallet!");
         return;
@@ -30,6 +30,29 @@ const useVoteProposal = () => {
         toast.error("No Proposal ID!");
         return;
       }
+
+      /* if (votecount > minRequiredVote) {
+        try {
+          const estimatedGas = await contract.executeProposal.estimateGas(
+            _proposalId
+          );
+          const tx = await contract.executeProposal(_proposalId, {
+            gasLimit: (estimatedGas * BigInt(120)) / BigInt(100),
+          });
+
+          const reciept = await tx.wait();
+
+          if (reciept.status === 1) {
+            toast.success("Execution successful");
+            return;
+          }
+          toast.error("Execution failed");
+          return;
+        } catch (error) {
+          console.error("error while Executing Proposal: ", error);
+          toast.error("Execution error");
+        }
+      } */
 
       try {
         const estimatedGas = await contract.vote.estimateGas(_proposalId);

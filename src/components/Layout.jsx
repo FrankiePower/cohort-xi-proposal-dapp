@@ -8,9 +8,9 @@ const Layout = ({ children }) => {
     <Container as="div" className="w-full">
       <Flex
         as="header"
-        className="flex justify-between border-b-2 border-blue-300 p-4"
+        className="flex justify-between border-b-2 border-black-300 p-8"
       >
-        <Box className="text-2xl font-bold text-blue-600">Proposal Dapp</Box>
+        <Box className="text-2xl font-bold text-black-600">Proposal Dapp</Box>
         <w3m-button />
       </Flex>
       <Box as="main" className="p-4">
