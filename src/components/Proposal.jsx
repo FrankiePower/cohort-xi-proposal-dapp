@@ -1,6 +1,11 @@
+"use client";
+
+import { Card } from "flowbite-react";
+
 import { Box, Button, Flex, Text } from "@radix-ui/themes";
 import { formatEther } from "ethers";
 import useVoteProposal from "../hooks/useVote";
+import flowbite from "flowbite-react/tailwind";
 
 const Proposal = ({
   id,
