@@ -31,7 +31,7 @@ const useVoteProposal = () => {
         return;
       }
 
-      if (votecount > minRequiredVote) {
+      if (votecount >= minRequiredVote) {
         try {
           const estimatedGas = await contract.executeProposal.estimateGas(
             _proposalId
