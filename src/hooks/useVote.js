@@ -31,7 +31,7 @@ const useVoteProposal = () => {
         return;
       }
 
-      /* if (votecount > minRequiredVote) {
+      if (votecount > minRequiredVote) {
         try {
           const estimatedGas = await contract.executeProposal.estimateGas(
             _proposalId
@@ -52,7 +52,7 @@ const useVoteProposal = () => {
           console.error("error while Executing Proposal: ", error);
           toast.error("Execution error");
         }
-      } */
+      }
 
       try {
         const estimatedGas = await contract.vote.estimateGas(_proposalId);

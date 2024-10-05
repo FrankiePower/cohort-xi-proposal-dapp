@@ -29,7 +29,7 @@ const Proposal = ({
       setButtonColor("blue");
       setText("Vote");
     }
-  }, [count]);
+  }, [votecount, minRequiredVote]);
 
   return (
     <div>
